@@ -28,11 +28,11 @@ func GetHelperResponse() alexa.Response {
 	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
 }
 
-// HandleSessionEndRequest is function-type
-func HandleSessionEndRequest() alexa.Response {
+// GetFinishRequest is function-type
+func GetFinishRequest() alexa.Response {
 	sessionAttributes := make(map[string]interface{})
 	cardTitle := "Session Ended"
-	speechOutput := "Thank you for trying the Alexa Skills Kit sample. Have a nice day! "
+	speechOutput := "解決できていれば何よりです"
 	repromptText := ""
 	shouldEndSession := true
 	fmt.Println(speechOutput)
@@ -103,13 +103,12 @@ func OnLaunch(launchRequest alexa.RequestDetail, session alexa.Session) (alexa.R
 // OnIntent is function-type
 func OnIntent(intentRequest alexa.RequestDetail, session alexa.Session) (alexa.Response, error) {
 	fmt.Println("OnIntent requestId=" + intentRequest.RequestID + ", sessionId=" + session.SessionID)
-	intent := intentRequest.Intent
 	intentName := intentRequest.Intent.Name
 
 	if intentName == "AMAZON.HelpIntent" {
 		return GetHelperResponse(), nil
 	} else if intentName == "AMAZON.StopIntent" || intentName == "AMAZON.CancelIntent" {
-		return HandleSessionEndRequest(), nil
+		return GetFinishRequest(), nil
 	}
 	return alexa.Response{}, ErrInvalidIntent
 }
