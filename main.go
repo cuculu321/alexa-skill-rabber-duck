@@ -39,40 +39,6 @@ func GetFinishRequest() alexa.Response {
 	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
 }
 
-// CreateFavoriteColorAttributes is function-type
-func CreateFavoriteColorAttributes(favoriteColor string) alexa.SessionAttributes {
-	sessionAttributes := make(map[string]interface{})
-	sessionAttributes["favoriteColor"] = favoriteColor
-	return sessionAttributes
-}
-
-// SetColorInSession is function-type
-func SetColorInSession(intent alexa.RequestIntent, session alexa.Session) alexa.Response {
-	cardTitle := intent.Name
-	sessionAttributes := make(map[string]interface{})
-	shouldEndSession := false
-	speechOutput := ""
-	repromptText := ""
-
-	if color, ok := intent.Slots["Color"]; ok {
-		favoriteColor := color.Value
-		sessionAttributes = CreateFavoriteColorAttributes(favoriteColor)
-		speechOutput = "I now know your favorite color is " + favoriteColor +
-			". You can ask me your favorite color by saying, " +
-			"what's my favorite color?"
-		repromptText = "You can ask me your favorite color by saying, " +
-			"what's my favorite color?"
-	} else {
-		speechOutput = "I'm not sure what your favorite color is. " +
-			"Please try again."
-		repromptText = "I'm not sure what your favorite color is. " +
-			"You can tell me your favorite color by saying, " +
-			"my favorite color is red."
-	}
-	fmt.Println(speechOutput)
-	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
-}
-
 // GetNoEntityResponse is function-type
 func GetNoEntityResponse() alexa.Response {
 	cardTitle := ""
@@ -100,12 +66,22 @@ func OnLaunch(launchRequest alexa.RequestDetail, session alexa.Session) (alexa.R
 	return GetHelperResponse(), nil
 }
 
+func GetIntentResponse() alexa.Response {
+	sessionAttributes := make(map[string]interface{})
+	cardTitle := "Response"
+	speechOutput := "ここの文章に適当な質問を仕込む"
+	repromptText := "また悩み事があれば相談してください。"
+	shouldEndSession := false
+	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
+}
+
 // OnIntent is function-type
 func OnIntent(intentRequest alexa.RequestDetail, session alexa.Session) (alexa.Response, error) {
 	fmt.Println("OnIntent requestId=" + intentRequest.RequestID + ", sessionId=" + session.SessionID)
 	intentName := intentRequest.Intent.Name
-
-	if intentName == "AMAZON.HelpIntent" {
+	if intentName == "HelloWorldIntent" {
+		return GetIntentResponse(), nil
+	} else if intentName == "AMAZON.HelpIntent" {
 		return GetHelperResponse(), nil
 	} else if intentName == "AMAZON.StopIntent" || intentName == "AMAZON.CancelIntent" {
 		return GetFinishRequest(), nil
