@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 var (
@@ -121,12 +122,11 @@ func Handler(event alexa.Request) (alexa.Response, error) {
 type Question struct {
 	MessageId int    `json:"message_id"`
 	Question  string `json:"question"`
-	Action    string
-	Points    int
-	Hidden    bool `dynamo:"-"`
 }
 
-func getQuestions() {
+func getQuestions() []Question {
+	var questions []Question = []Question{}
+
 	svc := dynamodb.New(session.New(), aws.NewConfig().WithRegion("ap-northeast-1"))
 
 	input := &dynamodb.ScanInput{
@@ -136,10 +136,17 @@ func getQuestions() {
 	result, err := svc.Scan(input)
 	if err != nil {
 		fmt.Println("[GetItem Error]", err)
-		return
+		questions = append(questions, Question{MessageId: 0, Question: "DBにアクセスできませんでした"})
 	}
-	fmt.Println(result)
+
+	for _, question := range result.Items {
+		var questionTmp Question
+		_ = dynamodbattribute.UnmarshalMap(question, &questionTmp)
+		questions = append(questions, questionTmp)
+	}
+	return questions
 }
+
 func main() {
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
 	lambda.Start(Handler)
