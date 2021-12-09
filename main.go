@@ -5,8 +5,11 @@ import (
 	"fmt"
 
 	"rubber-duck/alexa"
-
+	//	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/guregu/dynamo"
 )
 
 var (
@@ -98,6 +101,7 @@ func OnSessionEnded(sessionEndedRequest alexa.RequestDetail, session alexa.Sessi
 //起動時の方法
 func Handler(event alexa.Request) (alexa.Response, error) {
 	fmt.Println("event.session.application.applicationId=" + event.Session.Application.ApplicationID)
+	getQuestions()
 
 	eventRequestType := event.Request.Type
 	fmt.Println(eventRequestType)
@@ -114,7 +118,46 @@ func Handler(event alexa.Request) (alexa.Response, error) {
 	return alexa.Response{}, ErrInvalidIntent
 }
 
+type Question struct {
+	MessageId int    `json:"message_id"`
+	Question  string `json:"question"`
+	Action    string
+	Points    int
+	Hidden    bool `dynamo:"-"`
+}
+
+func getQuestions() {
+	sess := session.Must(session.NewSession())
+	db := dynamo.New(sess, &aws.Config{Region: aws.String("ap-northeast-1")})
+	table := db.Table("coaching_words")
+
+	// get the same item
+	var result []Question
+	err := table.Scan().All(&result)
+
+	fmt.Println(result)
+	// put item
+	w := Question{MessageId: 610, Question: "hello"}
+	err = table.Put(w).Run()
+	fmt.Println(err)
+
+	fmt.Println("put")
+	// get all items
+	var results []Question
+	err = table.Scan().All(&results)
+
+	// use placeholders in filter expressions (see Expressions section below)
+	var filtered []Question
+	err = table.Scan().Filter("'Count' > ?", 10).All(&filtered)
+}
 func main() {
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
+	fmt.Println("hoge")
 	lambda.Start(Handler)
+}
+
+func var_dump(v ...interface{}) {
+	for _, vv := range v {
+		fmt.Printf("%#v\n", vv)
+	}
 }
