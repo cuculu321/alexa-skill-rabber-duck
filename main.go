@@ -146,9 +146,3 @@ func main() {
 	getQuestions()
 	lambda.Start(Handler)
 }
-
-func var_dump(v ...interface{}) {
-	for _, vv := range v {
-		fmt.Printf("%#v\n", vv)
-	}
-}
