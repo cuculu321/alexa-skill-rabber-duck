@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/guregu/dynamo"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 var (
@@ -127,32 +127,23 @@ type Question struct {
 }
 
 func getQuestions() {
-	sess := session.Must(session.NewSession())
-	db := dynamo.New(sess, &aws.Config{Region: aws.String("ap-northeast-1")})
-	table := db.Table("coaching_words")
+	svc := dynamodb.New(session.New(), aws.NewConfig().WithRegion("ap-northeast-1"))
 
-	// get the same item
-	var result []Question
-	err := table.Scan().All(&result)
+	input := &dynamodb.ScanInput{
+		TableName: aws.String("coaching_words"),
+	}
 
+	result, err := svc.Scan(input)
+	if err != nil {
+		fmt.Println("[GetItem Error]", err)
+		return
+	}
 	fmt.Println(result)
-	// put item
-	w := Question{MessageId: 610, Question: "hello"}
-	err = table.Put(w).Run()
-	fmt.Println(err)
-
-	fmt.Println("put")
-	// get all items
-	var results []Question
-	err = table.Scan().All(&results)
-
-	// use placeholders in filter expressions (see Expressions section below)
-	var filtered []Question
-	err = table.Scan().Filter("'Count' > ?", 10).All(&filtered)
 }
 func main() {
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
 	fmt.Println("hoge")
+	getQuestions()
 	lambda.Start(Handler)
 }
 
