@@ -123,7 +123,6 @@ func Handler(event alexa.Request) (alexa.Response, error) {
 }
 
 func main() {
-	GetIntentResponse()
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
 	lambda.Start(Handler)
 }
