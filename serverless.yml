@@ -1,4 +1,4 @@
-service: alexa-skills-kit-color-go
+service: alexa-skills-kit-coaching
 
 provider:
   name: aws
