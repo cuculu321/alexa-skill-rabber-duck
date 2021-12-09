@@ -1,7 +1,5 @@
 package alexa
 
-import "fmt"
-
 /*
  * define structs for Alexa Response
  */
@@ -52,8 +50,8 @@ func BuildSpeechletResponse(title string, output string, repromptText string, sh
 		},
 		Card: Card{
 			Type:    "Simple",
-			Title:   "SessionSpeechlet - " + "hoge",
-			Content: "SessionSpeechlet - " + "hoge",
+			Title:   "SessionSpeechlet - " + title,
+			Content: "SessionSpeechlet - " + output,
 		},
 		Reprompt: Reprompt{
 			OutputSpeech: OutputSpeech{
@@ -66,7 +64,6 @@ func BuildSpeechletResponse(title string, output string, repromptText string, sh
 
 // BuildResponse is function-type
 func BuildResponse(sessionAttributes SessionAttributes, speechletResponse SpeechletResponse) Response {
-	fmt.Println("文字を作っているよ")
 	return Response{
 		Version:           "1.0",
 		Response:          speechletResponse,
