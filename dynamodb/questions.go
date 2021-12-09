@@ -15,7 +15,7 @@ type Question struct {
 }
 
 //DynamoDBから文字列を取得する
-func getQuestions() []Question {
+func GetQuestions() []Question {
 	var questions []Question = []Question{}
 
 	svc := dynamodb.New(session.New(), aws.NewConfig().WithRegion("ap-northeast-1"))

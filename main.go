@@ -6,12 +6,9 @@ import (
 	"math/rand"
 
 	"rubber-duck/alexa"
-	//	"github.com/aws/aws-lambda-go/lambda"
+	"rubber-duck/dynamodb"
+
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 var (
@@ -72,16 +69,18 @@ func OnLaunch(launchRequest alexa.RequestDetail, session alexa.Session) (alexa.R
 }
 
 func GetIntentResponse() alexa.Response {
-	questions := getQuestions()
-	question := questions[rand.Intn(len(questions))]
-	fmt.Println(question)
-
+	question := GetQuestion()
 	sessionAttributes := make(map[string]interface{})
 	cardTitle := "Response"
 	speechOutput := question.Question
 	repromptText := "また悩み事があれば相談してください。"
 	shouldEndSession := false
 	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
+}
+
+func GetQuestion() dynamodb.Question {
+	questions := dynamodb.GetQuestions()
+	return questions[rand.Intn(len(questions))]
 }
 
 // OnIntent is function-type
@@ -107,7 +106,6 @@ func OnSessionEnded(sessionEndedRequest alexa.RequestDetail, session alexa.Sessi
 //起動時の方法
 func Handler(event alexa.Request) (alexa.Response, error) {
 	fmt.Println("event.session.application.applicationId=" + event.Session.Application.ApplicationID)
-	getQuestions()
 
 	eventRequestType := event.Request.Type
 	fmt.Println(eventRequestType)
@@ -124,36 +122,8 @@ func Handler(event alexa.Request) (alexa.Response, error) {
 	return alexa.Response{}, ErrInvalidIntent
 }
 
-type Question struct {
-	MessageId int    `json:"message_id"`
-	Question  string `json:"question"`
-}
-
-//DynamoDBから文字列を取得する
-func getQuestions() []Question {
-	var questions []Question = []Question{}
-
-	svc := dynamodb.New(session.New(), aws.NewConfig().WithRegion("ap-northeast-1"))
-
-	input := &dynamodb.ScanInput{
-		TableName: aws.String("coaching_words"),
-	}
-
-	result, err := svc.Scan(input)
-	if err != nil {
-		fmt.Println("[GetItem Error]", err)
-		questions = append(questions, Question{MessageId: 0, Question: "DBにアクセスできませんでした"})
-	}
-
-	for _, question := range result.Items {
-		var questionTmp Question
-		_ = dynamodbattribute.UnmarshalMap(question, &questionTmp)
-		questions = append(questions, questionTmp)
-	}
-	return questions
-}
-
 func main() {
+	GetIntentResponse()
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
 	lambda.Start(Handler)
 }
