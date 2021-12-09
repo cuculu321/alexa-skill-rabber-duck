@@ -142,7 +142,5 @@ func getQuestions() {
 }
 func main() {
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
-	fmt.Println("hoge")
-	getQuestions()
 	lambda.Start(Handler)
 }
