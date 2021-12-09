@@ -68,6 +68,7 @@ func OnLaunch(launchRequest alexa.RequestDetail, session alexa.Session) (alexa.R
 	return GetHelperResponse(), nil
 }
 
+// インテント呼び出し時の返答
 func GetIntentResponse() alexa.Response {
 	question := GetQuestion()
 	sessionAttributes := make(map[string]interface{})
@@ -78,6 +79,7 @@ func GetIntentResponse() alexa.Response {
 	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
 }
 
+// ユーザに返す質問を取得する
 func GetQuestion() dynamodb.Question {
 	questions := dynamodb.GetQuestions()
 	return questions[rand.Intn(len(questions))]
@@ -123,7 +125,6 @@ func Handler(event alexa.Request) (alexa.Response, error) {
 }
 
 func main() {
-	GetIntentResponse()
 	//see https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/golang-handler.html
 	lambda.Start(Handler)
 }
