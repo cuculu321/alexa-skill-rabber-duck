@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	"rubber-duck/alexa"
 	//	"github.com/aws/aws-lambda-go/lambda"
@@ -71,9 +72,13 @@ func OnLaunch(launchRequest alexa.RequestDetail, session alexa.Session) (alexa.R
 }
 
 func GetIntentResponse() alexa.Response {
+	questions := getQuestions()
+	question := questions[rand.Intn(len(questions))]
+	fmt.Println(question)
+
 	sessionAttributes := make(map[string]interface{})
 	cardTitle := "Response"
-	speechOutput := "ここの文章に適当な質問を仕込む"
+	speechOutput := question.Question
 	repromptText := "また悩み事があれば相談してください。"
 	shouldEndSession := false
 	return alexa.BuildResponse(sessionAttributes, alexa.BuildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession))
@@ -124,6 +129,7 @@ type Question struct {
 	Question  string `json:"question"`
 }
 
+//DynamoDBから文字列を取得する
 func getQuestions() []Question {
 	var questions []Question = []Question{}
 
